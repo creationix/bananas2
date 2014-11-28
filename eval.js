@@ -6,6 +6,8 @@ module.exports = evaluate;
 
 var stdlib = evaluate.stdlib = Object.create(null);
 
+stdlib.list = list;
+
 stdlib.lambda = lambda;
 lambda.raw = true;
 
@@ -59,6 +61,10 @@ function evaluate(scope, value) {
     error: "First list item must resolve to a function",
     offset: value[0].offset
   };
+}
+
+function list(scope, args) {
+  return args;
 }
 
 function lambda(scope, args) {

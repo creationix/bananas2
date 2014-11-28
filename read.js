@@ -1,4 +1,7 @@
 "use strict";
+
+var p = require('./modules/utils.js').prettyPrint;
+
 module.exports = function (code) {
   return parse(tokenize(code));
 };
@@ -6,10 +9,10 @@ module.exports = function (code) {
 var rules = [
   null,       /^\s+/,
   null,       /^--.*/,
-  CONSTANT,   /^(?:"(?:[^"\\]|\\.)*")/,
-  CONSTANT,   /^(?:0|-?[1-9][0-9]*)/,
-  CONSTANT,   /^(?:true|false|null)\b/,
-  ID,       /^[^\s()[\]{}",'`:;#|\\]+/,
+  // CONSTANT,   /^(?:"(?:[^"\\]|\\.)*")/,
+  // CONSTANT,   /^(?:0|-?[1-9][0-9]*)/,
+  // CONSTANT,   /^(?:true|false|null)\b/,
+  // ID,       /^[^\s()[\]{}",'`:;#|\\]+/,
   CHAR,     /^./,
 ];
 
@@ -98,6 +101,17 @@ function parse(tokens) {
         current = stack.pop();
         current.push(value);
       }
+      else if (token.char === ":") {
+        var id = current.pop();
+        p({id:id});
+        if (!id.id) {
+          return current.push({
+            error: "Expected identifier before colon",
+            offset: id.offset
+          });
+        }
+        expectStack.push(id.id);
+      }
       else {
         return current.push({
           error:"Unexpected character: " + token.char,
@@ -106,7 +120,12 @@ function parse(tokens) {
       }
     }
     else {
-      current.push(token);
+      if (!(expectStack[expectStack.length - 1] in closers)) {
+        current[expectStack.pop()] = token;
+      }
+      else {
+        current.push(token);
+      }
     }
   });
   var expected;

@@ -121,6 +121,9 @@ function dump(value) {
       parts = value.map(function (item) {
         return dumper(item, depth + 1);
       });
+      parts = Object.keys(value).map(function (key) {
+        return colorize("property", key) + colon + " " + dumper(value[key], depth + 1);
+      });
     }
     else {
       opener = obrace;
